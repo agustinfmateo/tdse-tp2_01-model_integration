@@ -173,13 +173,28 @@ void task_sensor_update(void *parameters)
 					if (EV_BTN_XX_DOWN == p_task_sensor_dta->event)
 					{
 						put_event_task_system(p_task_sensor_cfg->signal_down);
-						p_task_sensor_dta->state = ST_BTN_XX_DOWN;
+						p_task_sensor_dta->state = ST_BTN_XX_FALLING;
+						p_task_sensor_dta->tick = DEL_BTN_XX_MAX;
 					}
 
 					break;
 
 				case ST_BTN_XX_FALLING:
-
+					if (p_task_sensor_dta->tick > 0)
+					{
+						p_task_sensor_dta->tick--;
+						break;
+					}
+					if (p_task_sensor_dta->tick == 0 && EV_BTN_XX_DOWN == p_task_sensor_dta->event)
+					{
+						put_event_task_system(p_task_sensor_cfg->signal_down);
+						p_task_sensor_dta->state = ST_BTN_XX_DOWN;
+					}
+					if (p_task_sensor_dta->tick == 0 && EV_BTN_XX_UP == p_task_sensor_dta->event)
+					{
+						put_event_task_system(p_task_sensor_cfg->signal_up);
+						p_task_sensor_dta->state = ST_BTN_XX_UP;
+					}
 					break;
 
 				case ST_BTN_XX_DOWN:
@@ -187,12 +202,28 @@ void task_sensor_update(void *parameters)
 					if (EV_BTN_XX_UP == p_task_sensor_dta->event)
 					{
 						put_event_task_system(p_task_sensor_cfg->signal_up);
-						p_task_sensor_dta->state = ST_BTN_XX_UP;
+						p_task_sensor_dta->state = ST_BTN_XX_RISING;
+						p_task_sensor_dta->tick = DEL_BTN_XX_MAX;
 					}
 
 					break;
 
 				case ST_BTN_XX_RISING:
+					if (p_task_sensor_dta->tick > 0)
+					{
+						p_task_sensor_dta->tick--;
+						break;
+					}
+					if (p_task_sensor_dta->tick == 0 && EV_BTN_XX_DOWN == p_task_sensor_dta->event)
+					{
+						put_event_task_system(p_task_sensor_cfg->signal_down);
+						p_task_sensor_dta->state = ST_BTN_XX_DOWN;
+					}
+					if (p_task_sensor_dta->tick == 0 && EV_BTN_XX_UP == p_task_sensor_dta->event)
+					{
+						put_event_task_system(p_task_sensor_cfg->signal_up);
+						p_task_sensor_dta->state = ST_BTN_XX_UP;
+					}
 
 					break;
 
@@ -200,6 +231,31 @@ void task_sensor_update(void *parameters)
 
 					break;
 			}
+
+/*
+			task_sensor_st_t state;
+			task_sensor_ev_t event;
+			task_sensor_ev_t tick;
+
+			for (index = 0; SENSOR_DTA_QTY > index; index++)
+			{
+
+				p_task_sensor_dta = &task_sensor_dta_list[index];
+
+
+				LOGGER_LOG("   %s = %lu", GET_NAME(index), index);
+
+				state = p_task_sensor_dta->state;
+				LOGGER_LOG("   %s = %lu", GET_NAME(state), (uint32_t)state);
+
+				event = p_task_sensor_dta->event;
+				LOGGER_LOG("   %s = %lu\r", GET_NAME(event), (uint32_t)event);
+
+				tick = p_task_sensor_dta->tick;
+				LOGGER_LOG("   %s = %lu\r\n", GET_NAME(tick), (uint32_t)tick);
+
+			}
+*/
 		}
     }
 }
